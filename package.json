@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/graemenickerson/tinyapp#readme",
   "dependencies": {
+    "ejs": "^2.7.1",
     "express": "^4.17.1"
   }
 }

@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/graemenickerson/tinyapp/issues"
   },
-  "homepage": "https://github.com/graemenickerson/tinyapp#readme"
+  "homepage": "https://github.com/graemenickerson/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }

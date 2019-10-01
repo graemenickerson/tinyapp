@@ -2,6 +2,8 @@
 // Graeme Nickerson
 // September 30, 2019s
 
+/* ------- Resources -------*/
+
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -12,6 +14,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+/* ------- Databases ------- */
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -31,8 +35,36 @@ const users = {
   }
 }
 
+/* ------- Functions ------- */
+
+// Generates a String of alphanumeric characters that is 6 char long
+const generateRandomString = function() {
+  const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let key = '';
+  for (let i = 0; i < 6; i++) {
+    key += data[Math.floor(Math.random() * data.length)];
+  }
+  return key;
+};
+
+// Check to see if the data input by user is vaild and not redundant
+const validateUser = (user, users) => {
+  if (user.email && user.password) {
+    for (let element in users) {
+      if(element.email === user.email) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+};
+
+/* ------- Path Requests ------- */
+
+// Root directory path
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.send("Hello! Goto http://localhost:8080/urls to access the tiny url app.");
 });
 
 app.listen(PORT, () => {
@@ -42,7 +74,7 @@ app.listen(PORT, () => {
 // Shows a page with the shortened urls
 app.get('/urls', (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    users,
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
@@ -63,7 +95,7 @@ app.post('/logout', (req, res) => {
 // Shows page for creating new user
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    users
   };
   res.render("urls_register", templateVars);
 });
@@ -71,7 +103,7 @@ app.get("/urls/register", (req, res) => {
 // shows page for adding link to database
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    users
   };
   res.render("urls_new", templateVars);
 });
@@ -85,16 +117,6 @@ app.get("/urls/:shortURL", (req, res) => {
   };
   res.render("urls_show", templateVars);
 });
-
-// Generates a String of alphanumeric characters that is 6 char long
-const generateRandomString = function() {
-  const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let key = '';
-  for (let i = 0; i < 6; i++) {
-    key += data[Math.floor(Math.random() * data.length)];
-  }
-  return key;
-};
 
 // Adds new url to database for shortening
 app.post("/urls", (req, res) => {
@@ -126,15 +148,21 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
-// Take new user info and stores it
+// Take new user info and stores it also assigns cookie
 app.post('/urls/register', (req, res) => {
   const newUser = req.body;
-  const newUserId = generateRandomString();
-  users[newUserId] = {
-    id: newUserId,
-    email: newUser.email,
-    password: newUser.password
-  };
-  res.cookie('username', newUserId);
-  res.redirect('/urls');
+  if (validateUser(newUser, users)) {
+    const newUserId = generateRandomString();
+    users[newUserId] = {
+      id: newUserId,
+      email: newUser.email,
+      password: newUser.password
+    };
+    res.cookie('user_id', newUserId);
+    res.redirect('/urls');
+  } else {
+    let templateVars = { users };
+    res.status(400);
+    res.render('urls_register', templateVars);
+  }
 });

@@ -23,10 +23,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
 app.get('/urls', (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
@@ -41,6 +37,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// Generates a String of alphanumeric characters that is 6 char long
 const generateRandomString = function() {
   const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let key = '';
@@ -58,6 +55,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShortURL}`);         // Respond with 'Ok' (we will replace this)
 });
 
+// Redirects shortUrl to longURL website
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
@@ -70,9 +68,12 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 })
 
 // Updates existing shortend url
-app.post("/urls/:shortURL/update", (req, res) => {
-  const newShortURL = generateRandomString()
-  urlDatabase[newShortURL] = req.body.longURL;
-  console.log(urlDatabase);  // Log the POST request body to the console
-  res.redirect(`/urls/${newShortURL}`);         // Respond with 'Ok' (we will replace this)
+app.post('/urls/:shortURL/update', (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.longURL;
+  res.redirect('/urls');
+});
+
+// Takes user to detail page where can edit
+app.post("/urls/:shortURL/edit", (req, res) => {
+  res.redirect(`/urls/${req.params.shortURL}`);
 });

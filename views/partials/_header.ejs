@@ -18,14 +18,14 @@
         <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">
             <label style="color: ghostwhite">Hello, <%= username %></label>
-            <button type="submit" class="btn btn-primary" style="background-color: transparent; border-color: transparent">Logout</button>
+            <button type="submit" class="btn btn-outline-light" style="border-color: transparent">Logout</button>
           </div>
         </form>
       <% } else { %>
       <form class="form-inline" action="/login" method="POST">
         <div class="form-group mb-2">
           <input class="form-control" type="text" placeholder="Username" name="username" style="width: 200px; margin: 1em">
-          <button type="submit" class="btn btn-primary" style="border-color: ghostwhite; background-color: transparent">Sign In</button>
+          <button type="submit" class="btn btn-outline-light">Sign In</button>
         </div>
       </form>
       <% } %>

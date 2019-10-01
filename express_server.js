@@ -18,6 +18,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -26,6 +39,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+// Shows a page with the shortened urls
 app.get('/urls', (req, res) => {
   let templateVars = {
     username: req.cookies["username"],
@@ -44,6 +58,14 @@ app.post('/login', (req, res) => {
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
   res.redirect('/urls');
+});
+
+// Shows page for creating new user
+app.get("/urls/register", (req, res) => {
+  let templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render("urls_register", templateVars);
 });
 
 // shows page for adding link to database
@@ -102,4 +124,17 @@ app.post('/urls/:shortURL/update', (req, res) => {
 // Takes user to detail page where can edit
 app.post("/urls/:shortURL/edit", (req, res) => {
   res.redirect(`/urls/${req.params.shortURL}`);
+});
+
+// Take new user info and stores it
+app.post('/urls/register', (req, res) => {
+  const newUser = req.body;
+  const newUserId = generateRandomString();
+  users[newUserId] = {
+    id: newUserId,
+    email: newUser.email,
+    password: newUser.password
+  };
+  res.cookie('username', newUserId);
+  res.redirect('/urls');
 });

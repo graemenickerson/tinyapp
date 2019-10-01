@@ -34,12 +34,12 @@
             <td><%= urls[url] %></td>
             <td>
               <form class="form-inline" action="/urls/<%= url %>/edit" method="POST">
-                <button type="submit" class="btn btn-primary" style="background-color:white; border-color:blue; color:blue" background="transparent">Edit</button>
+                <button type="submit" class="btn btn-outline-primary">Edit</button>
               </form>
             </td>
             <td>
               <form class="form-inline" action="/urls/<%= url %>/delete" method="POST">
-                <button type="submit" class="btn btn-primary" style="background-color:white; border-color:red; color:red" background="transparent">Delete</button>
+                <button type="submit" class="btn btn-outline-danger">Delete</button>
               </form>
             </td>
           </tr>

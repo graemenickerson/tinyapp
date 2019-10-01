@@ -50,6 +50,7 @@ const generateRandomString = function() {
   return key;
 }
 
+// Adds new url to database for shortening
 app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString()
   urlDatabase[newShortURL] = req.body.longURL;
@@ -60,4 +61,18 @@ app.post("/urls", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+});
+
+// Deletes selected url for database
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+})
+
+// Updates existing shortend url
+app.post("/urls/:shortURL/update", (req, res) => {
+  const newShortURL = generateRandomString()
+  urlDatabase[newShortURL] = req.body.longURL;
+  console.log(urlDatabase);  // Log the POST request body to the console
+  res.redirect(`/urls/${newShortURL}`);         // Respond with 'Ok' (we will replace this)
 });

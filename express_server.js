@@ -74,28 +74,19 @@ app.listen(PORT, () => {
 // Shows a page with the shortened urls
 app.get('/urls', (req, res) => {
   let templateVars = {
-    users,
+    username: req.cookies["user_id"],
+    users: users,
     urls: urlDatabase
   };
   res.render('urls_index', templateVars);
 });
 
-// User can log in and is assigned a cookie
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
-  res.redirect('/urls');
-});
-
-// Logs user out and deletes cookie from browser
-app.post('/logout', (req, res) => {
-  res.clearCookie('username');
-  res.redirect('/urls');
-});
 
 // Shows page for creating new user
 app.get("/urls/register", (req, res) => {
   let templateVars = {
-    users
+    username: req.cookies["user_id"],
+    users: users
   };
   res.render("urls_register", templateVars);
 });
@@ -103,7 +94,8 @@ app.get("/urls/register", (req, res) => {
 // shows page for adding link to database
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    users
+    username: req.cookies["user_id"],
+    users: users
   };
   res.render("urls_new", templateVars);
 });
@@ -111,11 +103,30 @@ app.get("/urls/new", (req, res) => {
 // Shows page for editing a shortend link
 app.get("/urls/:shortURL", (req, res) => {
   let templateVars = {
-    username: req.cookies["username"],
+    username: req.cookies["user_id"],
+    users: users,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
   res.render("urls_show", templateVars);
+});
+
+// Redirects shortUrl to longURL website
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
+// User can log in and is assigned a cookie
+app.post('/login', (req, res) => {
+  res.cookie('user_id', req.body.username);
+  res.redirect('/urls');
+});
+
+// Logs user out and deletes cookie from browser
+app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
+  res.redirect('/urls');
 });
 
 // Adds new url to database for shortening
@@ -123,12 +134,6 @@ app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   urlDatabase[newShortURL] = req.body.longURL;
   res.redirect(`/urls/${newShortURL}`);
-});
-
-// Redirects shortUrl to longURL website
-app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
 });
 
 // Deletes selected url for database
@@ -161,7 +166,7 @@ app.post('/urls/register', (req, res) => {
     res.cookie('user_id', newUserId);
     res.redirect('/urls');
   } else {
-    let templateVars = { users };
+    let templateVars = { username: req.cookies["user_id"], users: users, };
     res.status(400);
     res.render('urls_register', templateVars);
   }

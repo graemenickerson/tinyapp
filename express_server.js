@@ -22,18 +22,18 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 /* ------- Functions ------- */
 
@@ -47,17 +47,28 @@ const generateRandomString = function() {
   return key;
 };
 
-// Check to see if the data input by user is vaild and not redundant
-const validateUser = (user, users) => {
-  if (user.email && user.password) {
-    for (let element in users) {
-      if(element.email === user.email) {
+// Check to see if the data input by user is vaild and does not already exist
+const validateUser = (newUser, users) => {
+  if (newUser.email && newUser.password) {
+    for (let user in users) {
+      if (users[user].email === newUser.email) {
         return false;
       }
     }
     return true;
   }
   return false;
+};
+
+// Checks input user credentials agains user database and returns
+// userId if valid returns false if not
+const loginUser = (userID, users) => {
+  for (let user in users) {
+    if (users[user].email === userID.email && users[user].password === userID.password) {
+      return user;
+    }
+  }
+  return undefined;
 };
 
 /* ------- Path Requests ------- */
@@ -88,6 +99,8 @@ app.get('/urls', (req, res) => {
 
 // Shows page for creating new user
 app.get("/urls/register", (req, res) => {
+  // let statCode = req.get('status');
+  // console.log(statCode);
   res.render("urls_register");
 });
 
@@ -155,17 +168,6 @@ app.post('/urls/:shortURL/update', (req, res) => {
   res.redirect('/urls');
 });
 
-// Checks input user credentials agains user database and returns
-// userId if valid returns false if not
-const loginUser = (userID, users) => {
-  for (let user in users) {
-    if (users[user].email === userID.email && users[user].password === userID.password) {
-      return user;
-    }
-  }
-  return undefined;
-};
-
 // Takes user info and compares to users database
 app.post("/urls/login", (req, res) => {
   const userID = req.body;
@@ -174,11 +176,8 @@ app.post("/urls/login", (req, res) => {
     res.cookie('user_id', user);
     res.redirect('/urls');
   } else {
-    let templateVars = {
-      user: users[req.cookies['user_id']]
-    };
-    res.status(400);
-    res.render('urls_login', templateVars);
+    res.status(403);
+    res.render('urls_login_err');
   }
 });
 
@@ -195,10 +194,7 @@ app.post('/urls/register', (req, res) => {
     res.cookie('user_id', newUserId);
     res.redirect('/urls');
   } else {
-    let templateVars = {
-      user: users[req.cookies['user_id']]
-    };
     res.status(400);
-    res.render('urls_register', templateVars);
+    res.render('urls_register_err');
   }
 });

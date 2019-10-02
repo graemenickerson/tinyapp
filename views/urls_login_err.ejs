@@ -1,4 +1,4 @@
-<!-- urls_register.ejs
+<!-- urls_login_err.ejs
   Graeme Nickerson
   October 1, 2019 -->
 
@@ -19,17 +19,18 @@
       <% include partials/_header %>
   
       <main style="margin: 1em;">
-        <h3>Register</h3>
-        <form action="/urls/register" method="POST">
+        <h3>Login</h3>
+        <p>Invalid Login. Please Try Again.</p>
+        <form action="/urls/login" method="POST">
           <div class="form-group mb-2">
             <label for="email">Enter Your Email:</label>
             <input class="form-control" type="text" name="email" placeholder="" style="width: 300px; margin: 1em">
             <label for="password">Enter a Password:</label>
             <input class="form-control" type="text" name="password" placeholder="" style="width: 300px; margin: 1em">
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary">Log In</button>
           </div>
         </form>
-        <p>Already have an account? <a href="/urls/login">Click Here</a> to login!</p>
+        <p>Don't already have an account? <a href="/urls/register">Click Here</a> to create one!</p>
       </main>
         <!-- Bootstrap JS -->
       <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

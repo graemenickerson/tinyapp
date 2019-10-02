@@ -15,6 +15,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+const bcrypt = require('bcrypt');
+
 /* ------- Databases ------- */
 
 // const urlDatabase = {
@@ -30,7 +32,7 @@ const users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: '$2b$10$t5erq/lVSdRNHtAXYGnJ8.RpWRYfC/MeCNb8omFl4tNZih7ussz2S'
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -68,8 +70,10 @@ const validateUser = (newUser, users) => {
 // userId if valid returns false if not
 const loginUser = (userID, users) => {
   for (let user in users) {
-    if (users[user].email === userID.email && users[user].password === userID.password) {
-      return user;
+    if (users[user].email === userID.email) {
+      if (bcrypt.compareSync(userID.password, users[user].password)) {
+        return user;
+      }
     }
   }
   return undefined;
@@ -100,12 +104,12 @@ app.get('/urls', (req, res) => {
       user: users[req.cookies['user_id']],
       urls: urlsForUser(req.cookies['user_id'])
     };
+    console.log(users);
     res.render('urls_index', templateVars);
   } else {
     res.status(400);
     res.redirect('/urls/login');
   }
-  
 });
 
 // Shows page for creating new user
@@ -207,10 +211,11 @@ app.post('/urls/register', (req, res) => {
   const newUser = req.body;
   if (validateUser(newUser, users)) {
     const newUserId = generateRandomString();
+    const hashPass = bcrypt.hashSync(newUser.password, 10);
     users[newUserId] = {
       id: newUserId,
       email: newUser.email,
-      password: newUser.password
+      password: hashPass
     };
     res.cookie('user_id', newUserId);
     res.redirect('/urls');

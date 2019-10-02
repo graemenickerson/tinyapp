@@ -17,14 +17,18 @@ app.use(cookieParser());
 
 /* ------- Databases ------- */
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
@@ -71,6 +75,17 @@ const loginUser = (userID, users) => {
   return undefined;
 };
 
+// Returns the urls associated with a user Id
+const urlsForUser = (id) => {
+  let results = {};
+  for (let url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      results[url] = urlDatabase[url].longURL;
+    }
+  }
+  return results;
+};
+
 /* ------- Path Requests ------- */
 
 // Root directory path
@@ -78,16 +93,12 @@ app.get("/", (req, res) => {
   res.send("Hello! Goto http://localhost:8080/urls to access the tiny url app.");
 });
 
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
-
 // Shows a page with the shortened urls
 app.get('/urls', (req, res) => {
   if (req.cookies['user_id']) {
     let templateVars = {
       user: users[req.cookies['user_id']],
-      urls: urlDatabase
+      urls: urlsForUser(req.cookies['user_id'])
     };
     res.render('urls_index', templateVars);
   } else {
@@ -99,8 +110,6 @@ app.get('/urls', (req, res) => {
 
 // Shows page for creating new user
 app.get("/urls/register", (req, res) => {
-  // let statCode = req.get('status');
-  // console.log(statCode);
   res.render("urls_register");
 });
 
@@ -117,7 +126,6 @@ app.get("/urls/new", (req, res) => {
     };
     res.render('urls_new', templateVars);
   } else {
-    res.status(400);
     res.redirect('/urls/login');
   }
 });
@@ -128,18 +136,17 @@ app.get("/urls/:shortURL", (req, res) => {
     let templateVars = {
       user: users[req.cookies['user_id']],
       shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL]
+      longURL: urlDatabase[req.params.shortURL].longURL
     };
     res.render("urls_show", templateVars);
   } else {
-    res.status(400);
     res.redirect('/urls/login');
   }
 });
 
 // Redirects shortUrl to longURL website
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -151,21 +158,35 @@ app.post('/urls/logout', (req, res) => {
 
 // Adds new url to database for shortening
 app.post("/urls", (req, res) => {
-  const newShortURL = generateRandomString();
-  urlDatabase[newShortURL] = req.body.longURL;
-  res.redirect(`/urls/${newShortURL}`);
+  if (req.cookies['user_id']) {
+    const newShortURL = generateRandomString();
+    urlDatabase[newShortURL] = {};
+    urlDatabase[newShortURL]['longURL'] = req.body.longURL;
+    urlDatabase[newShortURL]['userID'] = req.cookies['user_id'];
+    res.redirect(`/urls/${newShortURL}`);
+  } else {
+    res.redirect('/urls/login');
+  }
 });
 
 // Deletes selected url for database
 app.post('/urls/:shortURL/delete', (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect('/urls');
+  if (req.cookies['user_id'] === urlDatabase[req.params.shortURL].userID) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/urls/login');
+  }
 });
 
 // Updates existing shortend url
 app.post('/urls/:shortURL/update', (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.longURL;
-  res.redirect('/urls');
+  if (req.cookies['user_id'] === urlDatabase[req.params.shortURL].userID) {
+    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+    res.redirect('/urls');
+  } else {
+    res.redirect('/urls/login');
+  }
 });
 
 // Takes user info and compares to users database
@@ -197,4 +218,8 @@ app.post('/urls/register', (req, res) => {
     res.status(400);
     res.render('urls_register_err');
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });

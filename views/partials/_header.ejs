@@ -17,7 +17,7 @@
       <% if (username) { %>
         <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">
-            <label style="color: ghostwhite">Hello, <%= users[username].email %>&nbsp;&nbsp;</label>
+            <label style="color: ghostwhite">Hello, <%= user.email %>&nbsp;&nbsp;</label>
             <button type="submit" class="btn btn-outline-light" style="border-color: transparent">Logout</button>
           </div>
         </form>

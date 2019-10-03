@@ -15,4 +15,29 @@ const getUserByEmail = function(email, database) {
   return user;
 };
 
-module.exports = { getUserByEmail };
+// Generates a String of alphanumeric characters that is 6 char long
+const generateRandomString = function() {
+  const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let key = '';
+  for (let i = 0; i < 6; i++) {
+    key += data[Math.floor(Math.random() * data.length)];
+  }
+  return key;
+};
+
+// Returns the urls associated with a user Id
+const urlsForUser = (id, database) => {
+  let results = {};
+  for (let url in database) {
+    if (database[url].userID === id) {
+      results[url] = database[url].longURL;
+    }
+  }
+  return results;
+};
+
+module.exports = { 
+  getUserByEmail,
+  generateRandomString,
+  urlsForUser
+ };

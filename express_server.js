@@ -4,26 +4,28 @@
 
 /* ------- Resources -------*/
 
+// Imports
 const express = require("express");
 const app = express();
 const PORT = 8080;
 app.set("view engine", "ejs");
-
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
 const cookieSession = require('cookie-session');
+const methodOverride = require('method-override')
+const bcrypt = require('bcrypt');
+
+// Set-up middleware
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
   keys: ['l0ngKeYst1ng'],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
-
-const bcrypt = require('bcrypt');
-const { getUserByEmail } = require('./helpers');
-
-const methodOverride = require('method-override')
 app.use(methodOverride('_method'));
+
+//Import Functions
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+
 
 /* ------- Databases ------- */
 
@@ -43,29 +45,6 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk"
   }
-};
-
-/* ------- Functions ------- */
-
-// Generates a String of alphanumeric characters that is 6 char long
-const generateRandomString = function() {
-  const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let key = '';
-  for (let i = 0; i < 6; i++) {
-    key += data[Math.floor(Math.random() * data.length)];
-  }
-  return key;
-};
-
-// Returns the urls associated with a user Id
-const urlsForUser = (id, database) => {
-  let results = {};
-  for (let url in database) {
-    if (database[url].userID === id) {
-      results[url] = database[url].longURL;
-    }
-  }
-  return results;
 };
 
 /* ------- Path Requests ------- */

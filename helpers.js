@@ -6,7 +6,7 @@
 // Checks input user email against user database and returns
 // userId if present and returns '' if not
 const getUserByEmail = function(email, database) {
-  let user = '';
+  let user = undefined;
   for (let element in database) {
     if (database[element].email === email) {
       user = element;

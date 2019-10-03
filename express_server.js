@@ -6,33 +6,24 @@
 
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 app.set("view engine", "ejs");
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-// const cookieParser = require('cookie-parser');
-// app.use(cookieParser());
-
 const cookieSession = require('cookie-session');
 app.use(cookieSession({
   name: 'session',
   keys: ['l0ngKeYst1ng'],
-
-  // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 const bcrypt = require('bcrypt');
 const { getUserByEmail } = require('./helpers');
 
 /* ------- Databases ------- */
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 const urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -64,11 +55,11 @@ const generateRandomString = function() {
 };
 
 // Returns the urls associated with a user Id
-const urlsForUser = (id) => {
+const urlsForUser = (id, database) => {
   let results = {};
-  for (let url in urlDatabase) {
-    if (urlDatabase[url].userID === id) {
-      results[url] = urlDatabase[url].longURL;
+  for (let url in database) {
+    if (database[url].userID === id) {
+      results[url] = database[url].longURL;
     }
   }
   return results;
@@ -78,7 +69,15 @@ const urlsForUser = (id) => {
 
 // Root directory path
 app.get("/", (req, res) => {
-  res.send("Hello! Goto http://localhost:8080/urls to access the tiny url app.");
+  if (req.session.user_id) {
+    let templateVars = {
+      user: users[req.session.user_id],
+      urls: urlsForUser(req.session.user_id)
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.redirect('/login');
+  }
 });
 
 // Shows a page with the shortened urls
@@ -86,24 +85,12 @@ app.get('/urls', (req, res) => {
   if (req.session.user_id) {
     let templateVars = {
       user: users[req.session.user_id],
-      urls: urlsForUser(req.session.user_id)
+      urls: urlsForUser(req.session.user_id, urlDatabase)
     };
-    console.log(users);
     res.render('urls_index', templateVars);
   } else {
-    res.status(400);
-    res.redirect('/urls/login');
+    res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls`);
   }
-});
-
-// Shows page for creating new user
-app.get("/urls/register", (req, res) => {
-  res.render("urls_register");
-});
-
-// Shows login page
-app.get('/urls/login', (req, res) => {
-  res.render("urls_login");
 });
 
 // shows page for adding link to database
@@ -120,28 +107,36 @@ app.get("/urls/new", (req, res) => {
 
 // Shows page for editing a shortend link
 app.get("/urls/:shortURL", (req, res) => {
+  let requestURL = req.params.shortURL;
   if (req.session.user_id) {
-    let templateVars = {
-      user: users[req.session.user_id],
-      shortURL: req.params.shortURL,
-      longURL: urlDatabase[req.params.shortURL].longURL
-    };
-    res.render("urls_show", templateVars);
+    if (urlDatabase[requestURL]) {
+      if (urlDatabase[requestURL].userID === req.session.user_id) {
+        let templateVars = {
+          user: users[req.session.user_id],
+          shortURL: requestURL,
+          longURL: urlDatabase[requestURL].longURL
+        };
+        res.render("urls_show", templateVars);
+      } else {
+        res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);
+      }
+    } else {
+      res.status(404).send(`404 Not Found. Cannot find: localhost:8080/urls/${requestURL}`);
+    }
   } else {
-    res.redirect('/urls/login');
+    res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);
   }
 });
 
 // Redirects shortUrl to longURL website
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL;
-  res.redirect(longURL);
-});
-
-// Logs user out and deletes cookie from browser
-app.post('/urls/logout', (req, res) => {
-  req.session = null;
-  res.redirect('/urls');
+  const requestURL = req.params.shortURL;
+  if (urlDatabase[requestURL]) {
+    const longURL = urlDatabase[requestURL].longURL;
+    res.redirect(longURL);
+  } else {
+    res.status(404).send(`404 Not Found. Cannot find: localhost:8080/urls/${requestURL}`);
+  }
 });
 
 // Adds new url to database for shortening
@@ -153,35 +148,54 @@ app.post("/urls", (req, res) => {
     urlDatabase[newShortURL]['userID'] = req.session.user_id;
     res.redirect(`/urls/${newShortURL}`);
   } else {
-    res.redirect('/urls/login');
+    res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls`);
+  }
+});
+
+// Updates existing shortend url
+app.post('/urls/:shortURL', (req, res) => {
+  let requestURL = req.params.shortURL;
+  if (req.session.user_id === urlDatabase[requestURL].userID) {
+    urlDatabase[requestURL].longURL = req.body.longURL;
+    res.redirect('/urls');
+  } else {
+    res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);
   }
 });
 
 // Deletes selected url for database
 app.post('/urls/:shortURL/delete', (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
-    delete urlDatabase[req.params.shortURL];
+  let requestURL = req.params.shortURL;
+  if (req.session.user_id === urlDatabase[requestURL].userID) {
+    delete urlDatabase[requestURL];
     res.redirect('/urls');
   } else {
-    res.redirect('/urls/login');
+    res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);
   }
 });
 
-// Updates existing shortend url
-app.post('/urls/:shortURL/update', (req, res) => {
-  if (req.session.user_id === urlDatabase[req.params.shortURL].userID) {
-    urlDatabase[req.params.shortURL].longURL = req.body.longURL;
+// Shows login page
+app.get('/login', (req, res) => {
+  if (req.session.user_id) {
     res.redirect('/urls');
   } else {
-    res.redirect('/urls/login');
+    res.render("urls_login");
+  }
+});
+
+// Shows page for creating new user
+app.get("/register", (req, res) => {
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.render("urls_register");
   }
 });
 
 // Takes user info and compares to users database
-app.post("/urls/login", (req, res) => {
+app.post("/login", (req, res) => {
   const userEmail = req.body.email;
   let user = getUserByEmail(userEmail, users);
-  console.log(user);
   if (user && bcrypt.compareSync(req.body.password, users[user].password)) {
     req.session.user_id = user;
     res.redirect('/urls');
@@ -192,9 +206,9 @@ app.post("/urls/login", (req, res) => {
 });
 
 // Take new user info and stores it also assigns cookie
-app.post('/urls/register', (req, res) => {
+app.post('/register', (req, res) => {
   const newUser = req.body;
-  if (getUserByEmail(newUser.email, users) === '') {
+  if (getUserByEmail(newUser.email, users) === undefined) {
     const newUserId = generateRandomString();
     const hashPass = bcrypt.hashSync(newUser.password, 10);
     users[newUserId] = {
@@ -208,6 +222,12 @@ app.post('/urls/register', (req, res) => {
     res.status(400);
     res.render('urls_register_err');
   }
+});
+
+// Logs user out and deletes cookie from browser
+app.post('/logout', (req, res) => {
+  req.session = null;
+  res.redirect('/');
 });
 
 app.listen(PORT, () => {

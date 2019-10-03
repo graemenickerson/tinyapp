@@ -15,7 +15,7 @@
         </div>
       </div>
       <% if (typeof user === 'object') { %>
-        <form class="form-inline" action="/urls/logout" method="POST">
+        <form class="form-inline" action="/logout" method="POST">
           <div class="form-group mb-2">
             <label style="color: ghostwhite">Hello, <%= user.email %>&nbsp;&nbsp;</label>
             <button type="submit" class="btn btn-outline-light" style="border-color: transparent">Logout</button>
@@ -23,11 +23,11 @@
         </form>
       <% } else { %>
         <div class="form-group mb-2">
-          <a href="/urls/register"><button type="submit" class="btn btn-outline-light" style="border-color: transparent">Register</button></a>
+          <a href="/register"><button type="submit" class="btn btn-outline-light" style="border-color: transparent">Register</button></a>
         </div>
         <h5 style="color: white">|</h5>
         <div class="form-group mb-2">
-          <a href="/urls/login"><button type="button" class="btn btn-outline-light" style="border-color: transparent">Log In</button></a>
+          <a href="/login"><button type="button" class="btn btn-outline-light" style="border-color: transparent">Log In</button></a>
         </div>
       <% } %>
     </nav>

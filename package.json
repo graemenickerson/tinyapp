@@ -2,9 +2,9 @@
   "name": "tinyapp",
   "version": "1.0.0",
   "description": "Small web app designed to shorten urls given to the server..",
-  "main": "index.js",
+  "main": "express_server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/mocha/bin/mocha",
     "start": "./node_modules/.bin/nodemon -L express_server.js"
   },
   "repository": {
@@ -26,6 +26,8 @@
     "express": "^4.17.1"
   },
   "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.1",
     "nodemon": "^1.19.3"
   }
 }

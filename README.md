@@ -19,7 +19,7 @@ Main urls page shows logged in user the urls that they have input and the short 
 
 
 The details page is where you can edit and update a url that has been shortend using TinyApp.
-![Detail Page](./media/detailAndEditPage.png))
+![Detail Page](./media/detailAndEditPage.png)
 
 
 ## Dependencies

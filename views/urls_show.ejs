@@ -22,7 +22,8 @@
     </div>
     <div class="card-body" style="background-color:rgb(235, 235, 235)">
       <h5 class="card-title" style="color: gray">Edit:</h5>
-      <form class="card-text" action="/urls/<%= shortURL %>" method="POST">
+      <form class="card-text" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
+        <input type="hidden" name="_method" value="PUT">
         <div class="card-text">
           <label for="longURL">Update Destination URL:</label>
           <input class="card-text" type="text" name="longURL" placeholder="<%= longURL %>" style="width: 300px; margin: 1em">

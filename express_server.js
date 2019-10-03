@@ -22,6 +22,9 @@ app.use(cookieSession({
 const bcrypt = require('bcrypt');
 const { getUserByEmail } = require('./helpers');
 
+const methodOverride = require('method-override')
+app.use(methodOverride('_method'));
+
 /* ------- Databases ------- */
 
 const urlDatabase = {
@@ -153,7 +156,7 @@ app.post("/urls", (req, res) => {
 });
 
 // Updates existing shortend url
-app.post('/urls/:shortURL', (req, res) => {
+app.put('/urls/:shortURL', (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin === urlDatabase[requestURL].userID) {
     urlDatabase[requestURL].longURL = req.body.longURL;
@@ -164,7 +167,7 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 // Deletes selected url from database
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.delete('/urls/:shortURL', (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin === urlDatabase[requestURL].userID) {
     delete urlDatabase[requestURL];

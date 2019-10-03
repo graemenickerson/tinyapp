@@ -36,7 +36,8 @@
               <a href="urls/<%= url %>"><button type="submit" class="btn btn-outline-primary">Edit</button></a>
             </td>
             <td>
-              <form class="form-inline" action="/urls/<%= url %>/delete" method="POST">
+              <form class="form-inline" method="POST" action="/urls/<%= url %>?_method=DELETE">
+                <input type="hidden" name="_method" value="delete"/>
                 <button type="submit" class="btn btn-outline-danger">Delete</button>
               </form>
             </td>

@@ -69,10 +69,10 @@ const urlsForUser = (id, database) => {
 
 // Root directory path
 app.get("/", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     let templateVars = {
-      user: users[req.session.user_id],
-      urls: urlsForUser(req.session.user_id)
+      user: users[req.session.userLogin],
+      urls: urlsForUser(req.session.userLogin)
     };
     res.render('urls_index', templateVars);
   } else {
@@ -82,10 +82,10 @@ app.get("/", (req, res) => {
 
 // Shows a page with the shortened urls
 app.get('/urls', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     let templateVars = {
-      user: users[req.session.user_id],
-      urls: urlsForUser(req.session.user_id, urlDatabase)
+      user: users[req.session.userLogin],
+      urls: urlsForUser(req.session.userLogin, urlDatabase)
     };
     res.render('urls_index', templateVars);
   } else {
@@ -95,9 +95,9 @@ app.get('/urls', (req, res) => {
 
 // shows page for adding link to database
 app.get("/urls/new", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     let templateVars = {
-      user: users[req.session.user_id],
+      user: users[req.session.userLogin],
     };
     res.render('urls_new', templateVars);
   } else {
@@ -108,11 +108,11 @@ app.get("/urls/new", (req, res) => {
 // Shows page for editing a shortend link
 app.get("/urls/:shortURL", (req, res) => {
   let requestURL = req.params.shortURL;
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     if (urlDatabase[requestURL]) {
-      if (urlDatabase[requestURL].userID === req.session.user_id) {
+      if (urlDatabase[requestURL].userID === req.session.userLogin) {
         let templateVars = {
-          user: users[req.session.user_id],
+          user: users[req.session.userLogin],
           shortURL: requestURL,
           longURL: urlDatabase[requestURL].longURL
         };
@@ -141,11 +141,11 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Adds new url to database for shortening
 app.post("/urls", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     const newShortURL = generateRandomString();
     urlDatabase[newShortURL] = {};
     urlDatabase[newShortURL]['longURL'] = req.body.longURL;
-    urlDatabase[newShortURL]['userID'] = req.session.user_id;
+    urlDatabase[newShortURL]['userID'] = req.session.userLogin;
     res.redirect(`/urls/${newShortURL}`);
   } else {
     res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls`);
@@ -155,7 +155,7 @@ app.post("/urls", (req, res) => {
 // Updates existing shortend url
 app.post('/urls/:shortURL', (req, res) => {
   let requestURL = req.params.shortURL;
-  if (req.session.user_id === urlDatabase[requestURL].userID) {
+  if (req.session.userLogin === urlDatabase[requestURL].userID) {
     urlDatabase[requestURL].longURL = req.body.longURL;
     res.redirect('/urls');
   } else {
@@ -166,7 +166,7 @@ app.post('/urls/:shortURL', (req, res) => {
 // Deletes selected url for database
 app.post('/urls/:shortURL/delete', (req, res) => {
   let requestURL = req.params.shortURL;
-  if (req.session.user_id === urlDatabase[requestURL].userID) {
+  if (req.session.userLogin === urlDatabase[requestURL].userID) {
     delete urlDatabase[requestURL];
     res.redirect('/urls');
   } else {
@@ -176,7 +176,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // Shows login page
 app.get('/login', (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     res.redirect('/urls');
   } else {
     res.render("urls_login");
@@ -185,7 +185,7 @@ app.get('/login', (req, res) => {
 
 // Shows page for creating new user
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
+  if (req.session.userLogin) {
     res.redirect('/urls');
   } else {
     res.render("urls_register");
@@ -197,7 +197,7 @@ app.post("/login", (req, res) => {
   const userEmail = req.body.email;
   let user = getUserByEmail(userEmail, users);
   if (user && bcrypt.compareSync(req.body.password, users[user].password)) {
-    req.session.user_id = user;
+    req.session.userLogin = user;
     res.redirect('/urls');
   } else {
     res.status(403);
@@ -216,7 +216,7 @@ app.post('/register', (req, res) => {
       email: newUser.email,
       password: hashPass
     };
-    req.session.user_id = newUserId;
+    req.session.userLogin = newUserId;
     res.redirect('/urls');
   } else {
     res.status(400);

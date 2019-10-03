@@ -23,29 +23,10 @@ app.use(cookieSession({
 }));
 app.use(methodOverride('_method'));
 
-//Import Functions
-const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers');
+//Import Functions and Databases
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./libraries/helpers');
+const { urlDatabase, users } = require('./libraries/databases');
 
-
-/* ------- Databases ------- */
-
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
-
-const users = {
-  "aJ48lW": {
-    id: "aJ48lW",
-    email: "user@example.com",
-    password: '$2b$10$t5erq/lVSdRNHtAXYGnJ8.RpWRYfC/MeCNb8omFl4tNZih7ussz2S'
-  },
-  "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  }
-};
 
 /* ------- Path Requests ------- */
 

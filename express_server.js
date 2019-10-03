@@ -80,7 +80,7 @@ app.get("/", (req, res) => {
   }
 });
 
-// Shows a page with the shortened urls
+// Shows main page with the shortened urls a user has created
 app.get('/urls', (req, res) => {
   if (req.session.userLogin) {
     let templateVars = {
@@ -93,7 +93,7 @@ app.get('/urls', (req, res) => {
   }
 });
 
-// shows page for adding link to database
+// Shows page for adding a link to the database
 app.get("/urls/new", (req, res) => {
   if (req.session.userLogin) {
     let templateVars = {
@@ -163,7 +163,7 @@ app.post('/urls/:shortURL', (req, res) => {
   }
 });
 
-// Deletes selected url for database
+// Deletes selected url from database
 app.post('/urls/:shortURL/delete', (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin === urlDatabase[requestURL].userID) {

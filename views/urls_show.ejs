@@ -31,7 +31,31 @@
         </div>
       </form>
     </div>
-    <div class="card-footer text-muted"></div>
+    <div class="card-footer"></div>
+    <div class="card-header">
+      <h5 class="card-title">This link has been visited <%= urlVisits %> times.</h5>
+      <h5 class="card-title">This link has had <%= uniqueVisitors %> unique visitors.</h5>
+    </div>
+    <div class="card-footer" style="background-color: white"></div>
+    <div>
+      <h5>Link Use History</h5>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">User</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (let visit of visitors) { %>
+            <tr>
+              <td><%= Object.values(visit)[0] %></td>
+              <td><%= Object.keys(visit)[0] %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

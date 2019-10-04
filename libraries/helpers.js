@@ -5,7 +5,7 @@
 
 // Checks input user email against user database and returns
 // userId if present and returns undefined if not.
-const getUserByEmail = function(email, database) {
+const getUserByEmail = (email, database) => {
   let user = undefined;
   for (let element in database) {
     if (database[element].email === email) {
@@ -16,7 +16,7 @@ const getUserByEmail = function(email, database) {
 };
 
 // Generates a String of alphanumeric characters that is 6 char long
-const generateRandomString = function() {
+const generateRandomString = () => {
   const data = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let key = '';
   for (let i = 0; i < 6; i++) {
@@ -36,8 +36,27 @@ const urlsForUser = (id, database) => {
   return results;
 };
 
+// Checks to see if a user has used the short link before
+const uniqueVisitor = (id, visitors) => {
+  if (visitors.findIndex((i => Object.keys(i)[0] === id)) === -1) {
+    return true;
+  }
+  return false;
+};
+
+// Returns the number of unique visitors to a short link
+const countUnique = (visitors) => {
+  let unqID = [];
+  for (let user of visitors) {
+    unqID.push(Object.keys(user)[0]);
+  }
+  return new Set(unqID).size;
+}
+
 module.exports = { 
   getUserByEmail,
   generateRandomString,
-  urlsForUser
+  urlsForUser,
+  uniqueVisitor,
+  countUnique
  };

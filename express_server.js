@@ -24,7 +24,7 @@ app.use(cookieSession({
 app.use(methodOverride('_method'));
 
 //Import Functions and Databases
-const { getUserByEmail, generateRandomString, urlsForUser } = require('./libraries/helpers');
+const { getUserByEmail, generateRandomString, urlsForUser, uniqueVisitor, countUnique } = require('./libraries/helpers');
 const { urlDatabase, users } = require('./libraries/databases');
 
 
@@ -68,16 +68,21 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-// Shows page for editing a shortend link
+// Shows page for editing a shortend link and viewing details
 app.get("/urls/:shortURL", (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin) {
     if (urlDatabase[requestURL]) {
       if (urlDatabase[requestURL].userID === req.session.userLogin) {
+        let uniqueVis = countUnique(urlDatabase[requestURL].visitors);
+
         let templateVars = {
           user: users[req.session.userLogin],
           shortURL: requestURL,
-          longURL: urlDatabase[requestURL].longURL
+          longURL: urlDatabase[requestURL].longURL,
+          urlVisits: urlDatabase[requestURL].urlVisits,
+          uniqueVisitors: uniqueVis,
+          visitors: urlDatabase[requestURL].visitors
         };
         res.render("urls_show", templateVars);
       } else {
@@ -95,8 +100,13 @@ app.get("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   const requestURL = req.params.shortURL;
   if (urlDatabase[requestURL]) {
-    const longURL = urlDatabase[requestURL].longURL;
-    res.redirect(longURL);
+    if (uniqueVisitor(req.session.hasVisited, urlDatabase[requestURL].visitors)) {
+      req.session.hasVisited = generateRandomString();
+      urlDatabase[requestURL].uniqueVisitors += 1;
+    }
+    urlDatabase[requestURL].urlVisits += 1;
+    urlDatabase[requestURL].visitors.push( {[req.session.hasVisited]: new Date().toLocaleString('en-US', {timeZone: 'America/Vancouver'})});
+    res.redirect(urlDatabase[requestURL].longURL);
   } else {
     res.status(404).send(`404 Not Found. Cannot find: localhost:8080/urls/${requestURL}`);
   }
@@ -109,6 +119,9 @@ app.post("/urls", (req, res) => {
     urlDatabase[newShortURL] = {};
     urlDatabase[newShortURL]['longURL'] = req.body.longURL;
     urlDatabase[newShortURL]['userID'] = req.session.userLogin;
+    urlDatabase[newShortURL]['urlVisits'] = 0;
+    urlDatabase[newShortURL]['uniqueVisitors'] = 0;
+    urlDatabase[newShortURL]['visitors'] = [];
     res.redirect(`/urls/${newShortURL}`);
   } else {
     res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls`);
@@ -120,6 +133,9 @@ app.put('/urls/:shortURL', (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin === urlDatabase[requestURL].userID) {
     urlDatabase[requestURL].longURL = req.body.longURL;
+    urlDatabase[requestURL].urlVisits = 0;
+    urlDatabase[requestURL].uniqueVisitors = 0;
+    urlDatabase[requestURL].visitors = [];
     res.redirect('/urls');
   } else {
     res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);

@@ -74,14 +74,13 @@ app.get("/urls/:shortURL", (req, res) => {
   if (req.session.userLogin) {
     if (urlDatabase[requestURL]) {
       if (urlDatabase[requestURL].userID === req.session.userLogin) {
-        let uniqueVis = countUnique(urlDatabase[requestURL].visitors);
-
         let templateVars = {
           user: users[req.session.userLogin],
           shortURL: requestURL,
           longURL: urlDatabase[requestURL].longURL,
+          dateCreated: urlDatabase[requestURL].dateCreated,
           urlVisits: urlDatabase[requestURL].urlVisits,
-          uniqueVisitors: uniqueVis,
+          uniqueVisitors: countUnique(urlDatabase[requestURL].visitors),
           visitors: urlDatabase[requestURL].visitors
         };
         res.render("urls_show", templateVars);
@@ -119,6 +118,7 @@ app.post("/urls", (req, res) => {
     urlDatabase[newShortURL] = {};
     urlDatabase[newShortURL]['longURL'] = req.body.longURL;
     urlDatabase[newShortURL]['userID'] = req.session.userLogin;
+    urlDatabase[newShortURL]['dateCreated'] = new Date().toLocaleDateString('en-US', {timeZone: 'America/Vancouver'});
     urlDatabase[newShortURL]['urlVisits'] = 0;
     urlDatabase[newShortURL]['uniqueVisitors'] = 0;
     urlDatabase[newShortURL]['visitors'] = [];
@@ -133,6 +133,7 @@ app.put('/urls/:shortURL', (req, res) => {
   let requestURL = req.params.shortURL;
   if (req.session.userLogin === urlDatabase[requestURL].userID) {
     urlDatabase[requestURL].longURL = req.body.longURL;
+    urlDatabase[requestURL].dateCreated = new Date().toLocaleDateString('en-US');
     urlDatabase[requestURL].urlVisits = 0;
     urlDatabase[requestURL].uniqueVisitors = 0;
     urlDatabase[requestURL].visitors = [];

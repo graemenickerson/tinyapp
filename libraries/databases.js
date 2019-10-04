@@ -3,8 +3,8 @@
 // October 3, 2019
 
 const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", urlVisits: 0, uniqueVisitors: 0, visitors:[]},
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW", urlVisits: 0, uniqueVisitors: 0, visitors:[] }
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW", dateCreated: '10/3/2019', urlVisits: 0, uniqueVisitors: 0, visitors:[]},
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW", dateCreated: '10/3/2019', urlVisits: 0, uniqueVisitors: 0, visitors:[] }
 };
 
 const users = {

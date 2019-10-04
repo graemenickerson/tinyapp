@@ -30,7 +30,7 @@ const urlsForUser = (id, database) => {
   let results = {};
   for (let url in database) {
     if (database[url].userID === id) {
-      results[url] = database[url].longURL;
+      results[url] = [database[url].longURL, database[url].dateCreated];
     }
   }
   return results;

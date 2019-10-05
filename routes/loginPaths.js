@@ -4,10 +4,33 @@
 
 const express = require('express');
 const router = express.Router();
-const { users } = require('../libraries/databases');
-const { getUserByEmail, generateRandomString, urlsForUser, uniqueVisitor, countUnique } = require('../libraries/helpers');
 
+const { users } = require('../libraries/databases');
+const { generateRandomString, urlsForUser, getUserByEmail } = require('../libraries/helpers');
+
+const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
+const bodyParser = require("body-parser");
+
+router.use(bodyParser.urlencoded({extended: true}));
+router.use(cookieSession({
+  name: 'session',
+  keys: ['l0ngKeYst1ng'],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
+// Root directory path
+router.get("/", (req, res) => {
+  if (req.session.userLogin) {
+    let templateVars = {
+      user: users[req.session.userLogin],
+      urls: urlsForUser(req.session.userLogin)
+    };
+    res.render('urls_index', templateVars);
+  } else {
+    res.redirect('/login');
+  }
+});
 
 // Shows login page
 router.get('/login', (req, res) => {

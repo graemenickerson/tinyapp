@@ -4,11 +4,23 @@
 
 const express = require('express');
 const router = express.Router();
+
 const { urlDatabase, users } = require('../libraries/databases');
-const { generateRandomString, urlsForUser, uniqueVisitor, countUnique } = require('../libraries/helpers');
+const { generateRandomString, urlsForUser, countUnique } = require('../libraries/helpers');
 
+const cookieSession = require('cookie-session');
+const methodOverride = require('method-override');
+const bodyParser = require("body-parser");
 
-router.get('/urls', (req, res) => {
+router.use(bodyParser.urlencoded({extended: true}));
+router.use(methodOverride('_method'));
+router.use(cookieSession({
+  name: 'session',
+  keys: ['l0ngKeYst1ng'],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
+
+router.get('/', (req, res) => {
   if (req.session.userLogin) {
     let templateVars = {
       user: users[req.session.userLogin],
@@ -101,6 +113,5 @@ router.delete('/:shortURL', (req, res) => {
     res.status(401).send(`401 Unauthorized. You do not have permission: localhost:8080/urls/${requestURL}`);
   }
 });
-
 
 module.exports = router;
